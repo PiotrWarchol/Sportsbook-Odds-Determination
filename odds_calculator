@@ -1,0 +1,38 @@
+# odds_calculator.py
+
+import pandas as pd
+from model import calculate_team_metrics, compute_odds
+
+def calculate_odds():
+    # Load the data and check for missing columns
+    try:
+        df = pd.read_csv('nfl_team_stats.csv')
+        required_columns = ['team', 'wins', 'losses', 'points_scored', 'points_allowed']
+        
+        # Check if all required columns are present
+        for column in required_columns:
+            if column not in df.columns:
+                raise ValueError(f"Missing required column: {column}")
+        
+        # Ensure numeric columns are of the correct type
+        df[['wins', 'losses', 'points_scored', 'points_allowed']] = df[['wins', 'losses', 'points_scored', 'points_allowed']].apply(pd.to_numeric, errors='coerce')
+
+        # Calculate team metrics
+        df = calculate_team_metrics(df)
+
+        # Calculate odds based on metrics
+        odds_df = compute_odds(df)
+
+        # Print the calculated odds
+        print("Calculated Odds:")
+        print(odds_df)
+
+    except FileNotFoundError:
+        print("The file 'nfl_team_stats.csv' was not found.")
+    except ValueError as ve:
+        print(f"Data Error: {ve}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+if __name__ == "__main__":
+    calculate_odds()
