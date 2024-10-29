@@ -1,0 +1,50 @@
+# fetch_data.py
+
+import requests
+import pandas as pd
+
+def fetch_nfl_data():
+    # Replace this with your API key from MySportsFeeds
+    api_key = "YOUR_API_KEY"
+    
+    # MySportsFeeds API endpoint for NFL team statistics
+    url = "https://api.mysportsfeeds.com/v2.1/pull/nfl/current/team_stats_totals.json"
+
+    # Headers for the request with API key authentication
+    headers = {
+        'Authorization': f'Basic {api_key}'
+    }
+    
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code == 200:
+        # Parse the JSON response
+        data = response.json()
+        
+        # List to store team data
+        teams_data = []
+
+        # Loop through the teams and extract relevant statistics
+        for team_info in data['teams']:
+            team_stats = team_info['teamStats']
+            team_data = {
+                'team': team_info['team']['name'],
+                'wins': team_stats['standings']['wins'],
+                'losses': team_stats['standings']['losses'],
+                'points_scored': team_stats['offense']['pointsFor'],
+                'points_allowed': team_stats['defense']['pointsAgainst'],
+            }
+            teams_data.append(team_data)
+        
+        # Create a DataFrame from the extracted data
+        df = pd.DataFrame(teams_data)
+        
+        # Save the DataFrame to a CSV file
+        df.to_csv('nfl_team_stats.csv', index=False)
+        print("NFL data fetched and saved to nfl_team_stats.csv")
+    else:
+        print(f"Failed to fetch data. Status code: {response.status_code}")
+        print(response.text)
+
+if __name__ == "__main__":
+    fetch_nfl_data()
