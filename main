@@ -1,0 +1,17 @@
+# main.py
+
+from fetch_data import fetch_nfl_data
+from odds_calculator import calculate_odds
+import os
+
+def main():
+    fetch_nfl_data()  # Step 1: Fetch data
+    
+    # Check if the CSV was created before proceeding
+    if os.path.exists('nfl_team_stats.csv'):
+        calculate_odds()  # Step 2: Calculate odds
+    else:
+        print("Error: nfl_team_stats.csv not found. Data fetching may have failed.")
+
+if __name__ == "__main__":
+    main()
