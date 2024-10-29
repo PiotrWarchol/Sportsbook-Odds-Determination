@@ -1,0 +1,33 @@
+# model.py
+
+import pandas as pd
+
+def calculate_team_metrics(df):
+    # Avoid division by zero by replacing 0 games played with NaN (not a number)
+    df['games_played'] = df['wins'] + df['losses']
+    df.loc[df['games_played'] == 0, ['win_percentage', 'scoring_differential', 'average_points_scored', 'average_points_allowed']] = None
+    
+    # Calculate win percentage and scoring differential
+    df['win_percentage'] = df['wins'] / df['games_played']
+    df['scoring_differential'] = df['points_scored'] - df['points_allowed']
+    df['average_points_scored'] = df['points_scored'] / df['games_played']
+    df['average_points_allowed'] = df['points_allowed'] / df['games_played']
+
+    return df
+
+def compute_odds(df):
+    # Avoid division by zero for win percentage
+    df.loc[df['win_percentage'] == 0, 'odds'] = None
+    df['odds'] = 1 / df['win_percentage']
+    
+    # Handle any NaN odds (e.g., for teams with no games played or win percentage of 0)
+    df['odds'].fillna(0, inplace=True)
+
+    # Normalize the odds for betting lines
+    total_odds = df['odds'].sum()
+    if total_odds > 0:
+        df['normalized_odds'] = df['odds'] / total_odds
+    else:
+        df['normalized_odds'] = 0
+
+    return df[['team', 'win_percentage', 'scoring_differential', 'normalized_odds']]
